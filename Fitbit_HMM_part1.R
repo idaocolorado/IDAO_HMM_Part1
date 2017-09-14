@@ -24,6 +24,24 @@ fitbit$sleepquality <- fitbit$Minutes.Asleep/fitbit$Time.in.Bed
 attach(fitbit)
 
 ##########################################################################
+# Examine number of awakenings data
+
+# Plot histogram
+filename1 <- "./HMM_number_of_awakenings_example_histogram.jpeg"
+jpeg(filename = filename1, width = 400, height = 300, quality = 90)
+hist(Number.of.Awakenings, 15)
+dev.off()
+
+# Plot of data
+filename2 <- "./HMM_number_of_awakenings_example_tsplot.jpeg"
+jpeg(filename = filename2, width = 400, height = 300, quality = 90)
+plot(Date, Number.of.Awakenings, type = "l", main = "Number of Awakenings")
+dev.off()
+
+
+#########################################################################
+## HMM Analysis using 2-4 state Poisson models
+
 # Use HMM to fit multiple state models to number of awakenings
 source("./HMM_functions.R") # To get functions needed for variable transformations
 
@@ -97,6 +115,9 @@ mod4s$AIC
 mod4h$AIC
 
 # Both select 3 state stationary as best model
+mod3s$lambda
+mod3s$delta
+round(mod3s$gamma, 2)
 
 # Local decoding of results
 ### A.1.13 Local decoding
@@ -113,6 +134,9 @@ statesglobal <- mod3s$lambda[globaldecode]
 
 # Plot states and values of local and global decoding
 # par(mfrow=c(1,2)) # To compare (here look the same)
+
+filename3 <- "./HMM_number_of_awakenings_example_localdecode.jpeg"
+jpeg(filename = filename3, width = 400, height = 300, quality = 90)
 plot(Date, Number.of.Awakenings, type = "l", 
      main = "Number of Awakenings:\n 3 State HMM with Poisson Distributon \n Local Decoding")
 lines(Date, states, col = "red")
@@ -125,6 +149,7 @@ legend("topleft",
        cex=0.9, #Text size
        y.intersp=0.9
 )#Spacing between text/lines
+dev.off()
 
 # Plot states and values of global decode
 plot(Date, Number.of.Awakenings, type = "l", 
@@ -142,13 +167,18 @@ legend("topleft",
 
 # 1 Step ahead forecast
 h<-1
+n <- length(d)
 xf<-0:20
 forecasts<-pois.HMM.forecast(xf,h,x,mod3s)
 fc<-forecasts[1,]
 par(mfrow=c(1,1),las=1)
+
+filename4 <- "./HMM_number_of_awakenings_example_onestepforecast.jpeg"
+jpeg(filename = filename4, width = 400, height = 300, quality = 90)
 plot(xf,fc,type="h",
      main=paste("Number of Awakenings\n Forecast distribution for", d[n]+1),
      xlim=c(0,max(xf)),xlab="count",ylab="probability",lwd=3)
+dev.off()
 
 #=== This is also the long-term forecast (Marginal distribution, dStat).
 par(mfrow=c(1,1))
@@ -165,6 +195,9 @@ xf<-0:20
 forecasts<-pois.HMM.forecast(xf,h,x,mod3s)
 fc<-forecasts[h,]
 par(mfrow=c(1,1),las=1)
+
+filename5 <- "./HMM_number_of_awakenings_example_marginalvs50dayforecast.jpeg"
+jpeg(filename = filename5, width = 400, height = 300, quality = 90)
 plot(xf,fc,type="h",
      main=paste("Forecast distribution for", d[n]+h),
      xlim=c(0,max(xf)),xlab="count",ylab="probability",lwd=3, col = "black")
@@ -178,7 +211,7 @@ legend("topright",
        cex=0.9, #Text size
        y.intersp=0.9
 )#Spacing between text/lines
-
+dev.off()
 
 
 
